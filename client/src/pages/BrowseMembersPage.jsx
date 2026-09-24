@@ -73,23 +73,23 @@ export const BrowseMembersPage = ({ setActiveTab }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6">
       
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-4 rounded-2xl shadow-2xl border border-emerald-400/40 flex items-center gap-3 animate-in slide-in-from-bottom duration-300">
-          <span className="text-2xl">🎉</span>
+        <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 left-4 sm:left-auto z-50 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl shadow-2xl border border-emerald-400/40 flex items-center gap-3 animate-in slide-in-from-bottom duration-300">
+          <span className="text-xl sm:text-2xl">🎉</span>
           <div className="text-xs font-bold">{toastMessage}</div>
         </div>
       )}
 
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-purple-900/40">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4 pb-4 border-b border-purple-900/40">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-pink-400 uppercase tracking-widest bg-pink-500/10 px-3 py-1 rounded-full border border-pink-500/20 mb-2">
+          <div className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-pink-400 uppercase tracking-wider sm:tracking-widest bg-pink-500/10 px-3 py-1 rounded-full border border-pink-500/20 mb-2">
             <Sparkles className="w-3.5 h-3.5" /> Pune Garba Directory
           </div>
-          <h1 className="text-3xl font-extrabold text-white sm:text-4xl">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-white">
             Find Your GarbaSaathi 💃
           </h1>
           <p className="text-xs sm:text-sm text-purple-200/70 mt-1">
@@ -99,18 +99,20 @@ export const BrowseMembersPage = ({ setActiveTab }) => {
 
         {/* User Login status */}
         {currentUser ? (
-          <div className="bg-purple-950/70 border border-purple-800/60 p-3 rounded-2xl flex items-center gap-3 shrink-0">
-            <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-10 h-10 rounded-full object-cover border border-pink-400" />
-            <div className="text-xs">
+          <div className="bg-purple-950/70 border border-purple-800/60 p-2.5 sm:p-3 rounded-2xl flex items-center gap-2.5 sm:gap-3 shrink-0 w-full sm:w-auto">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-amber-500 flex items-center justify-center font-bold text-white text-sm sm:text-base shrink-0 shadow border border-pink-400/50">
+              {currentUser.gender === 'Female' ? '💃' : currentUser.gender === 'Male' ? '🕺' : '✨'}
+            </div>
+            <div className="text-xs min-w-0">
               <p className="text-[10px] text-pink-300 font-semibold">Logged in as:</p>
-              <p className="font-extrabold text-white">{currentUser.name} ({currentUser.area})</p>
+              <p className="font-extrabold text-white truncate">{currentUser.name} ({currentUser.area})</p>
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => { setActiveTab('login'); window.scrollTo(0,0); }}
-              className="px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow"
+              className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow"
             >
               <LogIn className="w-4 h-4" /> Login to Connect
             </button>
@@ -119,7 +121,7 @@ export const BrowseMembersPage = ({ setActiveTab }) => {
       </div>
 
       {/* Day Selector Pills */}
-      <div className="bg-[#190a30] border border-purple-800/50 p-4 rounded-3xl space-y-2">
+      <div className="bg-[#190a30] border border-purple-800/50 p-3 sm:p-4 rounded-2xl sm:rounded-3xl space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
             <Calendar className="w-4 h-4 text-pink-400" /> Select Navratri Day:
@@ -164,7 +166,7 @@ export const BrowseMembersPage = ({ setActiveTab }) => {
       </div>
 
       {/* Filters Bar */}
-      <div className="bg-[#180930]/80 border border-purple-800/40 p-4 rounded-3xl space-y-4">
+      <div className="bg-[#180930]/80 border border-purple-800/40 p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2 text-xs font-bold text-purple-200">
             <Filter className="w-4 h-4 text-pink-400" /> Filter Members
@@ -177,7 +179,7 @@ export const BrowseMembersPage = ({ setActiveTab }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
           
           <div>
             <label className="block text-[10px] font-bold text-purple-300/80 uppercase mb-1">Pune Area</label>
@@ -281,7 +283,7 @@ export const BrowseMembersPage = ({ setActiveTab }) => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {users.map((member) => (
             <MemberCard
               key={member.id}

@@ -35,14 +35,14 @@ export const LoginPage = ({ setActiveTab }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-16">
+    <div className="max-w-md mx-auto px-3 sm:px-4 py-8 sm:py-16">
       
       {/* Header */}
-      <div className="text-center mb-8 space-y-2">
+      <div className="text-center mb-6 sm:mb-8 space-y-2">
         <div className="inline-flex items-center gap-1.5 text-xs font-bold text-pink-400 uppercase tracking-widest bg-pink-500/10 px-3.5 py-1 rounded-full border border-pink-500/20">
           <Sparkles className="w-3.5 h-3.5 text-amber-300" /> Community Portal
         </div>
-        <h1 className="text-3xl font-extrabold text-white">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
           Welcome Back 💃
         </h1>
         <p className="text-xs text-purple-200/70">
@@ -51,13 +51,13 @@ export const LoginPage = ({ setActiveTab }) => {
       </div>
 
       {errorMsg && (
-        <div className="mb-6 p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs font-bold text-center">
+        <div className="mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs font-bold text-center">
           ⚠️ {errorMsg}
         </div>
       )}
 
       {/* Clean Login Card */}
-      <form onSubmit={handleSubmit} className="bg-[#180930]/90 border border-purple-800/50 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+      <form onSubmit={handleSubmit} className="bg-[#180930]/90 border border-purple-800/50 rounded-2xl sm:rounded-3xl p-5 sm:p-8 space-y-5 sm:space-y-6 shadow-2xl">
         
         <div>
           <label className="block text-xs font-bold text-purple-200 mb-1.5">

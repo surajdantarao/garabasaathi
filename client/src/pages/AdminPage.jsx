@@ -122,15 +122,15 @@ export const AdminPage = ({ setActiveTab }) => {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-8">
       
       {/* Top Admin Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-purple-900/40">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-4 border-b border-purple-900/40">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 uppercase tracking-widest bg-amber-500/10 px-3.5 py-1 rounded-full border border-amber-500/20 mb-2">
+          <div className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-amber-400 uppercase tracking-wider sm:tracking-widest bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 mb-2">
             <ShieldCheck className="w-4 h-4" /> Platform Administration & Control Panel
           </div>
-          <h1 className="text-3xl font-extrabold text-white sm:text-4xl">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-white">
             Admin Management Dashboard
           </h1>
           <p className="text-xs sm:text-sm text-purple-200/70 mt-1">
@@ -138,17 +138,17 @@ export const AdminPage = ({ setActiveTab }) => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
           <button
             onClick={fetchAdminData}
-            className="p-2.5 bg-purple-950/80 hover:bg-purple-900/80 text-purple-300 rounded-xl border border-purple-800/60 transition"
+            className="p-2.5 bg-purple-950/80 hover:bg-purple-900/80 text-purple-300 rounded-xl border border-purple-800/60 transition active:scale-95"
             title="Refresh Data"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
           <button
             onClick={handleReseedData}
-            className="px-4 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow"
+            className="px-3.5 sm:px-4 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow active:scale-95"
           >
             <Database className="w-4 h-4" /> Reset / Seed DB
           </button>
@@ -156,85 +156,85 @@ export const AdminPage = ({ setActiveTab }) => {
       </div>
 
       {message && (
-        <div className="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 text-xs font-bold text-center animate-in fade-in">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 text-xs font-bold text-center animate-in fade-in">
           ✅ {message}
         </div>
       )}
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
         
-        <div className="bg-[#180930] border border-purple-800/50 p-5 rounded-3xl flex items-center gap-4 shadow-lg">
-          <div className="w-12 h-12 rounded-2xl bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0">
-            <Users className="w-6 h-6" />
+        <div className="bg-[#180930] border border-purple-800/50 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl flex items-center gap-3 sm:gap-4 shadow-lg">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <p className="text-[10px] font-bold text-purple-300/70 uppercase">Registered Users</p>
-            <p className="text-3xl font-black text-white mt-0.5">{stats?.totalUsers || 0}</p>
-          </div>
-        </div>
-
-        <div className="bg-[#180930] border border-purple-800/50 p-5 rounded-3xl flex items-center gap-4 shadow-lg">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold text-purple-300/70 uppercase">Accepted Connections</p>
-            <p className="text-3xl font-black text-white mt-0.5">{stats?.acceptedConnections || 0}</p>
+          <div className="min-w-0">
+            <p className="text-[9px] sm:text-[10px] font-bold text-purple-300/70 uppercase truncate">Users</p>
+            <p className="text-2xl sm:text-3xl font-black text-white mt-0.5">{stats?.totalUsers || 0}</p>
           </div>
         </div>
 
-        <div className="bg-[#180930] border border-purple-800/50 p-5 rounded-3xl flex items-center gap-4 shadow-lg">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-            <Clock className="w-6 h-6" />
+        <div className="bg-[#180930] border border-purple-800/50 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl flex items-center gap-3 sm:gap-4 shadow-lg">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <p className="text-[10px] font-bold text-purple-300/70 uppercase">Pending Requests</p>
-            <p className="text-3xl font-black text-white mt-0.5">{stats?.pendingRequests || 0}</p>
+          <div className="min-w-0">
+            <p className="text-[9px] sm:text-[10px] font-bold text-purple-300/70 uppercase truncate">Matches</p>
+            <p className="text-2xl sm:text-3xl font-black text-white mt-0.5">{stats?.acceptedConnections || 0}</p>
           </div>
         </div>
 
-        <div className="bg-[#180930] border border-purple-800/50 p-5 rounded-3xl flex items-center gap-4 shadow-lg">
-          <div className="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
-            <MapPin className="w-6 h-6" />
+        <div className="bg-[#180930] border border-purple-800/50 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl flex items-center gap-3 sm:gap-4 shadow-lg">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <p className="text-[10px] font-bold text-purple-300/70 uppercase">Pune Hubs Active</p>
-            <p className="text-3xl font-black text-white mt-0.5">{stats?.areaStats?.length || 0}</p>
+          <div className="min-w-0">
+            <p className="text-[9px] sm:text-[10px] font-bold text-purple-300/70 uppercase truncate">Pending</p>
+            <p className="text-2xl sm:text-3xl font-black text-white mt-0.5">{stats?.pendingRequests || 0}</p>
+          </div>
+        </div>
+
+        <div className="bg-[#180930] border border-purple-800/50 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl flex items-center gap-3 sm:gap-4 shadow-lg">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
+            <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[9px] sm:text-[10px] font-bold text-purple-300/70 uppercase truncate">Pune Hubs</p>
+            <p className="text-2xl sm:text-3xl font-black text-white mt-0.5">{stats?.areaStats?.length || 0}</p>
           </div>
         </div>
 
       </div>
 
       {/* Admin Panel Sub-Tabs */}
-      <div className="flex items-center gap-2 border-b border-purple-900/50 pb-2">
+      <div className="flex items-center gap-2 border-b border-purple-900/50 pb-2 overflow-x-auto no-scrollbar flex-nowrap -mx-3 px-3 sm:mx-0 sm:px-0">
         <button
           onClick={() => setActiveAdminTab('users')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition border ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs font-bold transition border whitespace-nowrap shrink-0 ${
             activeTab === 'users'
               ? 'bg-gradient-to-r from-pink-600 via-rose-600 to-amber-600 text-white border-pink-400 shadow-md'
               : 'bg-purple-950/60 text-purple-300 border-purple-800/50 hover:bg-purple-900/40'
           }`}
         >
           <Users className="w-4 h-4" />
-          <span>Manage User Accounts ({filteredUsers.length})</span>
+          <span>User Accounts ({filteredUsers.length})</span>
         </button>
 
         <button
           onClick={() => setActiveAdminTab('connections')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition border ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs font-bold transition border whitespace-nowrap shrink-0 ${
             activeTab === 'connections'
               ? 'bg-gradient-to-r from-pink-600 via-rose-600 to-amber-600 text-white border-pink-400 shadow-md'
               : 'bg-purple-950/60 text-purple-300 border-purple-800/50 hover:bg-purple-900/40'
           }`}
         >
           <HeartHandshake className="w-4 h-4" />
-          <span>Connection Requests & Matches ({connectionsList.length})</span>
+          <span>Requests & Matches ({connectionsList.length})</span>
         </button>
 
         <button
           onClick={() => setActiveAdminTab('demographics')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition border ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs font-bold transition border whitespace-nowrap shrink-0 ${
             activeTab === 'demographics'
               ? 'bg-gradient-to-r from-pink-600 via-rose-600 to-amber-600 text-white border-pink-400 shadow-md'
               : 'bg-purple-950/60 text-purple-300 border-purple-800/50 hover:bg-purple-900/40'

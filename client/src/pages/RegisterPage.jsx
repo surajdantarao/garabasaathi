@@ -59,14 +59,14 @@ export const RegisterPage = ({ setActiveTab }) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
       
       {/* Header */}
-      <div className="text-center mb-8 space-y-2">
+      <div className="text-center mb-6 sm:mb-8 space-y-2">
         <div className="inline-flex items-center gap-1.5 text-xs font-bold text-pink-400 uppercase tracking-widest bg-pink-500/10 px-3.5 py-1 rounded-full border border-pink-500/20">
           <Sparkles className="w-3.5 h-3.5" /> Join Pune Community
         </div>
-        <h1 className="text-3xl font-extrabold text-white sm:text-4xl">
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-white">
           Join GarbaSaathi 💃🕺
         </h1>
         <p className="text-xs sm:text-sm text-purple-200/70 max-w-lg mx-auto">
@@ -75,13 +75,13 @@ export const RegisterPage = ({ setActiveTab }) => {
       </div>
 
       {errorMsg && (
-        <div className="mb-6 p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs font-bold text-center">
+        <div className="mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs font-bold text-center">
           ⚠️ {errorMsg}
         </div>
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-[#180930]/90 border border-purple-800/50 rounded-3xl p-6 sm:p-8 space-y-8 shadow-2xl">
+      <form onSubmit={handleSubmit} className="bg-[#180930]/90 border border-purple-800/50 rounded-2xl sm:rounded-3xl p-4 sm:p-8 space-y-6 sm:space-y-8 shadow-2xl">
         
         {/* Section 1: Account Credentials */}
         <div className="space-y-4">

@@ -6,9 +6,9 @@ export const Footer = ({ setActiveTab }) => {
   const { currentUser } = useUser();
 
   return (
-    <footer className="bg-[#0c0417] border-t border-purple-900/50 text-purple-200/80 pt-12 pb-8">
+    <footer className="bg-[#0c0417] border-t border-purple-900/50 text-purple-200/80 pt-8 sm:pt-12 pb-6 sm:pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-purple-900/40">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 pb-8 sm:pb-10 border-b border-purple-900/40">
           
           {/* Brand Info */}
           <div className="space-y-4 md:col-span-1">
