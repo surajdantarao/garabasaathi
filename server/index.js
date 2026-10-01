@@ -517,13 +517,24 @@ app.get('/api/connections/my', (req, res) => {
       ORDER BY c.navratriDay ASC, c.createdAt DESC
     `).all(uId, uId, uId, uId, uId, uId, uId, uId, uId, uId);
 
+    // Deduplicate accepted rows by partnerId + navratriDay to ensure each partner only shows ONCE per day
+    const seenPartnerDay = new Set();
+    const uniqueAcceptedRows = [];
+    acceptedRows.forEach(item => {
+      const key = `${item.partnerId}_${item.navratriDay}`;
+      if (!seenPartnerDay.has(key)) {
+        seenPartnerDay.add(key);
+        uniqueAcceptedRows.push(item);
+      }
+    });
+
     // Group accepted connections by Navratri day
     const acceptedGrouped = {};
     for (let d = 1; d <= 9; d++) {
       acceptedGrouped[`Day ${d}`] = [];
     }
 
-    acceptedRows.forEach(item => {
+    uniqueAcceptedRows.forEach(item => {
       const dayKey = `Day ${item.navratriDay}`;
       if (!acceptedGrouped[dayKey]) acceptedGrouped[dayKey] = [];
       acceptedGrouped[dayKey].push(item);
@@ -534,11 +545,11 @@ app.get('/api/connections/my', (req, res) => {
       stats: {
         receivedPendingCount: receivedPending.length,
         sentPendingCount: sentPending.length,
-        acceptedCount: acceptedRows.length
+        acceptedCount: uniqueAcceptedRows.length
       },
       receivedPending,
       sentPending,
-      accepted: acceptedRows,
+      accepted: uniqueAcceptedRows,
       acceptedGrouped
     });
   } catch (error) {
@@ -853,16 +864,24 @@ app.post('/api/sync/restore', (req, res) => {
       activeUser = db.prepare('SELECT * FROM users WHERE id = ?').get(insert.lastInsertRowid);
     }
 
-    // Re-link any cached connections if missing
+    // Re-link any cached connections if missing (avoiding duplicate reverse pairs)
     if (Array.isArray(connections) && activeUser) {
       for (const conn of connections) {
         if (conn.partnerId && conn.navratriDay) {
           const partnerExists = db.prepare('SELECT id FROM users WHERE id = ?').get(conn.partnerId);
           if (partnerExists) {
-            db.prepare(`
-              INSERT OR IGNORE INTO connections (senderId, receiverId, navratriDay, status)
-              VALUES (?, ?, ?, ?)
-            `).run(activeUser.id, conn.partnerId, conn.navratriDay, conn.status || 'accepted');
+            const alreadyExists = db.prepare(`
+              SELECT id FROM connections 
+              WHERE ((senderId = ? AND receiverId = ?) OR (senderId = ? AND receiverId = ?))
+                AND navratriDay = ?
+            `).get(activeUser.id, conn.partnerId, conn.partnerId, activeUser.id, conn.navratriDay);
+
+            if (!alreadyExists) {
+              db.prepare(`
+                INSERT OR IGNORE INTO connections (senderId, receiverId, navratriDay, status)
+                VALUES (?, ?, ?, ?)
+              `).run(activeUser.id, conn.partnerId, conn.navratriDay, conn.status || 'accepted');
+            }
           }
         }
       }

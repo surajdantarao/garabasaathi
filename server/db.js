@@ -64,6 +64,20 @@ function initDb() {
     CREATE INDEX IF NOT EXISTS idx_messages_connection ON messages(connectionId);
   `);
 
+  // Remove any legacy reverse duplicate connection pairs
+  db.exec(`
+    DELETE FROM connections WHERE id IN (
+      SELECT c1.id FROM connections c1
+      JOIN connections c2 ON (
+        c1.senderId = c2.receiverId 
+        AND c1.receiverId = c2.senderId 
+        AND c1.navratriDay = c2.navratriDay
+        AND c1.id > c2.id
+      )
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_connections_pair ON connections(min(senderId, receiverId), max(senderId, receiverId), navratriDay);
+  `);
+
   console.log('Database tables with Auth, Connection Requests & Chat Messages initialized.');
 }
 

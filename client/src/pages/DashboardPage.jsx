@@ -13,7 +13,46 @@ export const DashboardPage = ({ setActiveTab }) => {
     try {
       if (currentUser?.id) {
         const cached = localStorage.getItem('garba_dash_cache_' + currentUser.id);
-        if (cached) return JSON.parse(cached);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          // Deduplicate accepted rows by partnerId + navratriDay
+          const seen = new Set();
+          const cleanAccepted = [];
+          (parsed.accepted || []).forEach(item => {
+            const key = `${item.partnerId || item.name}_${item.navratriDay}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              cleanAccepted.push(item);
+            }
+          });
+
+          const cleanGrouped = {};
+          for (let d = 1; d <= 9; d++) {
+            const dayKey = `Day ${d}`;
+            const raw = (parsed.acceptedGrouped && parsed.acceptedGrouped[dayKey]) || [];
+            const daySeen = new Set();
+            cleanGrouped[dayKey] = [];
+            raw.forEach(item => {
+              const key = item.partnerId || item.name;
+              if (!daySeen.has(key)) {
+                daySeen.add(key);
+                cleanGrouped[dayKey].push(item);
+              }
+            });
+          }
+
+          return {
+            receivedPending: parsed.receivedPending || [],
+            sentPending: parsed.sentPending || [],
+            accepted: cleanAccepted,
+            acceptedGrouped: cleanGrouped,
+            stats: {
+              receivedPendingCount: parsed.stats?.receivedPendingCount || 0,
+              sentPendingCount: parsed.stats?.sentPendingCount || 0,
+              acceptedCount: cleanAccepted.length
+            }
+          };
+        }
       }
     } catch (e) {}
     return {
@@ -34,12 +73,42 @@ export const DashboardPage = ({ setActiveTab }) => {
       const res = await fetch(apiUrl(`/api/connections/my?userId=${currentUser.id}`));
       const data = await res.json();
       if (data.success) {
+        // Deduplicate accepted connections so each partner only shows ONCE per day
+        const seen = new Set();
+        const cleanAccepted = [];
+        (data.accepted || []).forEach(item => {
+          const key = `${item.partnerId || item.name}_${item.navratriDay}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            cleanAccepted.push(item);
+          }
+        });
+
+        const cleanGrouped = {};
+        for (let d = 1; d <= 9; d++) {
+          const dayKey = `Day ${d}`;
+          const raw = (data.acceptedGrouped && data.acceptedGrouped[dayKey]) || [];
+          const daySeen = new Set();
+          cleanGrouped[dayKey] = [];
+          raw.forEach(item => {
+            const key = item.partnerId || item.name;
+            if (!daySeen.has(key)) {
+              daySeen.add(key);
+              cleanGrouped[dayKey].push(item);
+            }
+          });
+        }
+
         const updated = {
           receivedPending: data.receivedPending || [],
           sentPending: data.sentPending || [],
-          accepted: data.accepted || [],
-          acceptedGrouped: data.acceptedGrouped || {},
-          stats: data.stats || { receivedPendingCount: 0, sentPendingCount: 0, acceptedCount: 0 }
+          accepted: cleanAccepted,
+          acceptedGrouped: cleanGrouped,
+          stats: {
+            receivedPendingCount: (data.receivedPending || []).length,
+            sentPendingCount: (data.sentPending || []).length,
+            acceptedCount: cleanAccepted.length
+          }
         };
         setDashData(updated);
         try {
@@ -317,7 +386,14 @@ export const DashboardPage = ({ setActiveTab }) => {
             <div className="space-y-4 sm:space-y-6">
               {NAVRATRI_DAYS.map((dayObj) => {
                 const dayKey = `Day ${dayObj.day}`;
-                const dayConns = dashData.acceptedGrouped[dayKey] || [];
+                const rawConns = dashData.acceptedGrouped[dayKey] || [];
+                const seenDayP = new Set();
+                const dayConns = rawConns.filter(item => {
+                  const key = item.partnerId || item.name;
+                  if (seenDayP.has(key)) return false;
+                  seenDayP.add(key);
+                  return true;
+                });
                 if (dayConns.length === 0) return null;
 
                 return (

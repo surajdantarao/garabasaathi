@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-01T08:39:16.039Z",
+  "timestamp": "2026-10-01T08:50:34.905Z",
   "users": [
     {
       "id": 1,
@@ -171,6 +171,25 @@
       "bio": "mkckls",
       "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
       "createdAt": "2026-09-24 12:04:00"
+    },
+    {
+      "id": 12,
+      "username": "Divya49",
+      "email": "divya@demo.com",
+      "password": "Suraj123",
+      "role": "user",
+      "name": "Divya",
+      "age": 22,
+      "gender": "Female",
+      "area": "Wakad",
+      "experience": "Intermediate",
+      "activity": "Both",
+      "availableDays": "[1,2,3,4,5,6,7,8,9]",
+      "lookingFor": "Garba Friends",
+      "socialContact": "divya_07",
+      "bio": "passionate about garbha",
+      "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+      "createdAt": "2026-10-01 08:42:20"
     }
   ],
   "connections": [
@@ -197,7 +216,48 @@
       "navratriDay": 2,
       "status": "accepted",
       "createdAt": "2026-09-24 11:39:20"
+    },
+    {
+      "id": 4,
+      "senderId": 12,
+      "receiverId": 11,
+      "navratriDay": 1,
+      "status": "accepted",
+      "createdAt": "2026-10-01 08:42:29"
     }
   ],
-  "messages": []
+  "messages": [
+    {
+      "id": 1,
+      "connectionId": 4,
+      "senderId": 11,
+      "receiverId": 12,
+      "text": "🎉 Hey! I accepted your request for Day 1 Garba! Excited to coordinate plans! 💃",
+      "createdAt": "2026-10-01 08:43:00"
+    },
+    {
+      "id": 2,
+      "connectionId": 4,
+      "senderId": 11,
+      "receiverId": 12,
+      "text": "hii",
+      "createdAt": "2026-10-01 08:43:12"
+    },
+    {
+      "id": 3,
+      "connectionId": 4,
+      "senderId": 12,
+      "receiverId": 11,
+      "text": "hii where are you from",
+      "createdAt": "2026-10-01 08:44:15"
+    },
+    {
+      "id": 4,
+      "connectionId": 4,
+      "senderId": 11,
+      "receiverId": 12,
+      "text": "pune",
+      "createdAt": "2026-10-01 08:44:27"
+    }
+  ]
 }
