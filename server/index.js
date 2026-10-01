@@ -80,7 +80,7 @@ function restoreBackupData() {
 function ensureAdminAccount() {
   const adminUsername = process.env.ADMIN_USERNAME;
   const adminPassword = process.env.ADMIN_PASSWORD;
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@garbasaathi.in';
+  const adminEmail = process.env.ADMIN_EMAIL || 'garbasaathi@gmail.com';
   const adminName = process.env.ADMIN_NAME || 'Platform Administrator';
 
   if (!adminUsername || !adminPassword) {

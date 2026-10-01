@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Lock, AlertTriangle, Users, HeartHandshake, EyeOff } from 'lucide-react';
+import { ShieldCheck, Lock, AlertTriangle, Users, HeartHandshake, EyeOff, Mail } from 'lucide-react';
 
 export const SafetySection = () => {
   return (
@@ -64,7 +64,7 @@ export const SafetySection = () => {
           </div>
           <h3 className="text-base font-bold text-white mb-2">5. Report Inappropriate Behavior</h3>
           <p className="text-xs text-purple-200/70 leading-relaxed">
-            If any user behaves inappropriately or breaks community standards, use the report button or notify platform moderators immediately.
+            If any user behaves inappropriately or breaks community standards, notify platform moderators immediately at <a href="mailto:garbasaathi@gmail.com" className="text-pink-400 font-bold underline">garbasaathi@gmail.com</a>.
           </p>
         </div>
 
@@ -80,7 +80,24 @@ export const SafetySection = () => {
 
       </div>
 
-      <div className="mt-8 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-6 text-center">
+      {/* Direct Contact Support Box */}
+      <div className="mt-8 bg-gradient-to-r from-purple-950 via-[#1f0b3b] to-purple-950 border border-purple-700/50 rounded-2xl p-6 text-center space-y-3 shadow-xl">
+        <h4 className="text-base font-bold text-white flex items-center justify-center gap-2">
+          <Mail className="w-5 h-5 text-pink-400" /> Have Questions or Need Support?
+        </h4>
+        <p className="text-xs text-purple-200/80 max-w-xl mx-auto leading-relaxed">
+          Our Pune community team is here to assist. For account inquiries, feedback, or reporting issues, email us directly:
+        </p>
+        <a
+          href="mailto:garbasaathi@gmail.com"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-pink-600/30 transition active:scale-95"
+        >
+          <Mail className="w-4 h-4" />
+          <span>garbasaathi@gmail.com</span>
+        </a>
+      </div>
+
+      <div className="mt-6 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-6 text-center">
         <p className="text-sm font-semibold text-emerald-200">
           Have fun, dance wholehearted Garba, dress in festive colors, and make lifelong Garba friends in Pune! 🎉
         </p>
