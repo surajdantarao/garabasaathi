@@ -629,13 +629,20 @@ app.get('/api/admin/connections', (req, res) => {
         uSend.id as senderId,
         uSend.name as senderName,
         uSend.username as senderUsername,
+        uSend.gender as senderGender,
         uSend.area as senderArea,
         uSend.socialContact as senderContact,
+        uSend.avatarUrl as senderAvatar,
         uRec.id as receiverId,
         uRec.name as receiverName,
         uRec.username as receiverUsername,
+        uRec.gender as receiverGender,
         uRec.area as receiverArea,
-        uRec.socialContact as receiverContact
+        uRec.socialContact as receiverContact,
+        uRec.avatarUrl as receiverAvatar,
+        (SELECT COUNT(*) FROM messages m WHERE m.connectionId = c.id) as messageCount,
+        (SELECT text FROM messages m WHERE m.connectionId = c.id ORDER BY m.createdAt DESC LIMIT 1) as lastMessage,
+        (SELECT createdAt FROM messages m WHERE m.connectionId = c.id ORDER BY m.createdAt DESC LIMIT 1) as lastMessageTime
       FROM connections c
       JOIN users uSend ON c.senderId = uSend.id
       JOIN users uRec ON c.receiverId = uRec.id
@@ -649,6 +656,109 @@ app.get('/api/admin/connections', (req, res) => {
   }
 });
 
+// 8c. GET /api/admin/chats - Monitor active user chats and conversation threads
+app.get('/api/admin/chats', (req, res) => {
+  try {
+    const chats = db.prepare(`
+      SELECT 
+        c.id as connectionId,
+        c.navratriDay,
+        c.status,
+        c.createdAt as connectionCreatedAt,
+        uSend.id as senderId,
+        uSend.name as senderName,
+        uSend.username as senderUsername,
+        uSend.gender as senderGender,
+        uSend.area as senderArea,
+        uSend.avatarUrl as senderAvatar,
+        uSend.socialContact as senderContact,
+        uRec.id as receiverId,
+        uRec.name as receiverName,
+        uRec.username as receiverUsername,
+        uRec.gender as receiverGender,
+        uRec.area as receiverArea,
+        uRec.avatarUrl as receiverAvatar,
+        uRec.socialContact as receiverContact,
+        (SELECT COUNT(*) FROM messages m WHERE m.connectionId = c.id) as messageCount,
+        (SELECT text FROM messages m WHERE m.connectionId = c.id ORDER BY m.createdAt DESC LIMIT 1) as lastMessage,
+        (SELECT createdAt FROM messages m WHERE m.connectionId = c.id ORDER BY m.createdAt DESC LIMIT 1) as lastMessageTime
+      FROM connections c
+      JOIN users uSend ON c.senderId = uSend.id
+      JOIN users uRec ON c.receiverId = uRec.id
+      WHERE c.status = 'accepted'
+      ORDER BY COALESCE((SELECT createdAt FROM messages m WHERE m.connectionId = c.id ORDER BY m.createdAt DESC LIMIT 1), c.createdAt) DESC
+    `).all();
+
+    res.json({ success: true, count: chats.length, chats });
+  } catch (error) {
+    console.error('Error fetching admin chats:', error);
+    res.status(500).json({ success: false, error: 'Failed to retrieve user chats' });
+  }
+});
+
+// 8d. GET /api/admin/chat/:connectionId - Admin view conversation details & complete messages
+app.get('/api/admin/chat/:connectionId', (req, res) => {
+  try {
+    const connectionId = parseInt(req.params.connectionId, 10);
+    const conn = db.prepare(`
+      SELECT 
+        c.id as connectionId,
+        c.navratriDay,
+        c.status,
+        c.createdAt as connectionCreatedAt,
+        uSend.id as senderId,
+        uSend.name as senderName,
+        uSend.username as senderUsername,
+        uSend.gender as senderGender,
+        uSend.area as senderArea,
+        uSend.socialContact as senderContact,
+        uSend.avatarUrl as senderAvatar,
+        uRec.id as receiverId,
+        uRec.name as receiverName,
+        uRec.username as receiverUsername,
+        uRec.gender as receiverGender,
+        uRec.area as receiverArea,
+        uRec.socialContact as receiverContact,
+        uRec.avatarUrl as receiverAvatar
+      FROM connections c
+      JOIN users uSend ON c.senderId = uSend.id
+      JOIN users uRec ON c.receiverId = uRec.id
+      WHERE c.id = ?
+    `).get(connectionId);
+
+    if (!conn) {
+      return res.status(404).json({ success: false, error: 'Connection not found' });
+    }
+
+    const messages = db.prepare(`
+      SELECT 
+        m.id,
+        m.connectionId,
+        m.senderId,
+        m.receiverId,
+        m.text,
+        m.createdAt,
+        u.name as senderName,
+        u.username as senderUsername,
+        u.gender as senderGender,
+        u.avatarUrl as senderAvatar
+      FROM messages m
+      JOIN users u ON m.senderId = u.id
+      WHERE m.connectionId = ?
+      ORDER BY m.createdAt ASC
+    `).all(connectionId);
+
+    res.json({
+      success: true,
+      connection: conn,
+      messages
+    });
+  } catch (error) {
+    console.error('Error fetching admin chat messages:', error);
+    res.status(500).json({ success: false, error: 'Failed to retrieve conversation history' });
+  }
+});
+
 // 9. GET /api/admin/stats - Admin Dashboard Stats
 app.get('/api/admin/stats', (req, res) => {
   try {
@@ -656,6 +766,7 @@ app.get('/api/admin/stats', (req, res) => {
     const totalConnections = db.prepare(`SELECT COUNT(*) as count FROM connections`).get().count;
     const pendingRequests = db.prepare(`SELECT COUNT(*) as count FROM connections WHERE status = 'pending'`).get().count;
     const acceptedConnections = db.prepare(`SELECT COUNT(*) as count FROM connections WHERE status = 'accepted'`).get().count;
+    const totalMessages = db.prepare(`SELECT COUNT(*) as count FROM messages`).get().count;
     
     const areaStats = db.prepare(`
       SELECT area, COUNT(*) as count FROM users WHERE role != 'admin' GROUP BY area ORDER BY count DESC
@@ -668,6 +779,7 @@ app.get('/api/admin/stats', (req, res) => {
         totalConnections,
         pendingRequests,
         acceptedConnections,
+        totalMessages,
         areaStats
       }
     });
