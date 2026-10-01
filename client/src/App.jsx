@@ -12,7 +12,20 @@ import { AdminPage } from './pages/AdminPage';
 
 function AppContent() {
   const { currentUser } = useUser();
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTabState] = useState(() => {
+    try {
+      return localStorage.getItem('garba_saathi_active_tab') || 'home';
+    } catch (e) {
+      return 'home';
+    }
+  });
+
+  const setActiveTab = (tab) => {
+    setActiveTabState(tab);
+    try {
+      localStorage.setItem('garba_saathi_active_tab', tab);
+    } catch (e) {}
+  };
 
   const renderCurrentTab = () => {
     switch (activeTab) {

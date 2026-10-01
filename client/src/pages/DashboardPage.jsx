@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import { Heart, Calendar, MapPin, AtSign, CheckCircle2, XCircle, Clock, Users, Sparkles, UserPlus, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Heart, Calendar, MapPin, AtSign, CheckCircle2, XCircle, Clock, Users, Sparkles, UserPlus, ShieldCheck, ArrowRight, MessageSquare } from 'lucide-react';
 import { NAVRATRI_DAYS } from '../utils/constants';
 import { apiUrl } from '../utils/api';
+import { ChatModal } from '../components/ChatModal';
 
 export const DashboardPage = ({ setActiveTab }) => {
   const { currentUser } = useUser();
   const [activeSubTab, setActiveSubTab] = useState('received'); // 'received' | 'sent' | 'connected'
-  const [dashData, setDashData] = useState({
-    receivedPending: [],
-    sentPending: [],
-    accepted: [],
-    acceptedGrouped: {},
-    stats: { receivedPendingCount: 0, sentPendingCount: 0, acceptedCount: 0 }
+  const [activeChat, setActiveChat] = useState(null);
+  const [dashData, setDashData] = useState(() => {
+    try {
+      if (currentUser?.id) {
+        const cached = localStorage.getItem('garba_dash_cache_' + currentUser.id);
+        if (cached) return JSON.parse(cached);
+      }
+    } catch (e) {}
+    return {
+      receivedPending: [],
+      sentPending: [],
+      accepted: [],
+      acceptedGrouped: {},
+      stats: { receivedPendingCount: 0, sentPendingCount: 0, acceptedCount: 0 }
+    };
   });
   const [loading, setLoading] = useState(true);
   const [toastMsg, setToastMsg] = useState(null);
@@ -24,13 +34,17 @@ export const DashboardPage = ({ setActiveTab }) => {
       const res = await fetch(apiUrl(`/api/connections/my?userId=${currentUser.id}`));
       const data = await res.json();
       if (data.success) {
-        setDashData({
+        const updated = {
           receivedPending: data.receivedPending || [],
           sentPending: data.sentPending || [],
           accepted: data.accepted || [],
           acceptedGrouped: data.acceptedGrouped || {},
           stats: data.stats || { receivedPendingCount: 0, sentPendingCount: 0, acceptedCount: 0 }
-        });
+        };
+        setDashData(updated);
+        try {
+          localStorage.setItem('garba_dash_cache_' + currentUser.id, JSON.stringify(updated));
+        } catch (e) {}
       }
     } catch (err) {
       console.error(err);
@@ -319,17 +333,30 @@ export const DashboardPage = ({ setActiveTab }) => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {dayConns.map((item) => (
-                        <div key={item.connectionId} className="glass-card rounded-2xl p-4 border border-purple-700/40 flex items-center gap-3">
-                          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-pink-600/30 to-amber-500/20 border border-pink-400/40 flex items-center justify-center text-xl shrink-0">
-                            💃
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h5 className="text-xs font-bold text-white truncate">{item.name}, {item.age}</h5>
-                            <p className="text-[10px] text-purple-300">{item.area}</p>
-                            <div className="mt-1 font-bold text-amber-300 text-[11px] bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 w-fit flex items-center gap-1">
-                              <AtSign className="w-3 h-3 text-pink-400" /> {item.socialContact}
+                        <div key={item.connectionId} className="glass-card rounded-2xl p-3.5 sm:p-4 border border-purple-700/40 flex flex-col justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-pink-600/30 to-amber-500/20 border border-pink-400/40 flex items-center justify-center text-xl shrink-0">
+                              {item.gender === 'Female' ? '💃' : item.gender === 'Male' ? '🕺' : '✨'}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h5 className="text-xs sm:text-sm font-bold text-white truncate">{item.name}, {item.age}</h5>
+                              <p className="text-[10px] text-purple-300 truncate">{item.area}, Pune</p>
+                              <div className="mt-1 font-bold text-amber-300 text-[10px] sm:text-[11px] bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20 w-fit flex items-center gap-1">
+                                <AtSign className="w-3 h-3 text-pink-400 shrink-0" /> {item.socialContact}
+                              </div>
                             </div>
                           </div>
+
+                          <button
+                            onClick={() => setActiveChat({
+                              connectionId: item.connectionId,
+                              partner: item,
+                              day: item.navratriDay || dayObj.day
+                            })}
+                            className="w-full py-2 px-3 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-pink-600/20 active:scale-95"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" /> Chat with {item.name.split(' ')[0]} 💬
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -339,6 +366,17 @@ export const DashboardPage = ({ setActiveTab }) => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Live Chat Modal for Connected Partners */}
+      {activeChat && (
+        <ChatModal
+          connectionId={activeChat.connectionId}
+          partner={activeChat.partner}
+          day={activeChat.day}
+          currentUser={currentUser}
+          onClose={() => setActiveChat(null)}
+        />
       )}
 
     </div>

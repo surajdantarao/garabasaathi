@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { X, MapPin, Calendar, Sparkles, CheckCircle2, ShieldCheck, AtSign, Clock, Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, MapPin, Calendar, Sparkles, CheckCircle2, ShieldCheck, AtSign, Clock, Lock, MessageSquare } from 'lucide-react';
 import { NAVRATRI_DAYS } from '../utils/constants';
 import { apiUrl } from '../utils/api';
+import { ChatModal } from './ChatModal';
 
 export const ProfileModal = ({ member, currentUser, selectedDay, onClose, onRequestSuccess, onRequireLogin }) => {
   if (!member) return null;
@@ -10,9 +11,25 @@ export const ProfileModal = ({ member, currentUser, selectedDay, onClose, onRequ
   const [targetDay, setTargetDay] = useState(
     selectedDay && selectedDay !== 'All' 
       ? parseInt(selectedDay, 10) 
-      : (member.availableDays[0] || 1)
+      : (member.connectedDay || member.availableDays[0] || 1)
   );
   const [requestStatus, setRequestStatus] = useState(member.connectionStatus || null);
+  const [connectionId, setConnectionId] = useState(member.connectionId || null);
+  const [showChat, setShowChat] = useState(false);
+
+  useEffect(() => {
+    if (currentUser?.id && member?.id && requestStatus === 'accepted' && !connectionId) {
+      fetch(apiUrl(`/api/connections/find?userId1=${currentUser.id}&userId2=${member.id}`))
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.connection) {
+            setConnectionId(data.connection.id);
+            if (data.connection.navratriDay) setTargetDay(data.connection.navratriDay);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [currentUser, member, requestStatus, connectionId]);
 
   const handleSendRequest = async () => {
     if (!currentUser) {
@@ -146,6 +163,34 @@ export const ProfileModal = ({ member, currentUser, selectedDay, onClose, onRequ
             </p>
           </div>
 
+          {/* Chat with Partner Option */}
+          {requestStatus === 'accepted' ? (
+            <div className="bg-gradient-to-r from-emerald-950/50 via-teal-950/40 to-purple-950/50 p-4 rounded-2xl border border-emerald-500/40 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Connected for Day {targetDay}
+                </span>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full font-bold border border-emerald-500/30">
+                  Chat Unlocked 🎉
+                </span>
+              </div>
+              <p className="text-xs text-purple-200/85">
+                You are connected with {member.name.split(' ')[0]}! You can now chat directly to coordinate your venue passes, timings, and outfits.
+              </p>
+              <button
+                onClick={() => setShowChat(true)}
+                className="w-full py-2.5 bg-gradient-to-r from-pink-600 via-rose-600 to-amber-600 hover:from-pink-500 hover:to-amber-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-pink-600/30 flex items-center justify-center gap-2 transition active:scale-95"
+              >
+                <MessageSquare className="w-4 h-4" /> 💬 Chat with {member.name.split(' ')[0]}
+              </button>
+            </div>
+          ) : (
+            <div className="bg-purple-950/40 p-3 rounded-2xl border border-purple-800/40 flex items-center gap-2 text-purple-300/70 text-xs">
+              <Lock className="w-4 h-4 text-purple-400 shrink-0" />
+              <span>Chat option unlocks automatically once connection request is accepted by both partners.</span>
+            </div>
+          )}
+
         </div>
 
         {/* Modal Action Footer */}
@@ -157,7 +202,8 @@ export const ProfileModal = ({ member, currentUser, selectedDay, onClose, onRequ
             <select
               value={targetDay}
               onChange={(e) => setTargetDay(parseInt(e.target.value, 10))}
-              className="w-full bg-purple-950 border border-purple-700/60 text-white text-xs font-bold rounded-xl px-2.5 py-2.5 sm:py-2 focus:outline-none focus:border-pink-500"
+              disabled={requestStatus === 'accepted'}
+              className="w-full bg-purple-950 border border-purple-700/60 text-white text-xs font-bold rounded-xl px-2.5 py-2.5 sm:py-2 focus:outline-none focus:border-pink-500 disabled:opacity-60"
             >
               {Array.isArray(member.availableDays) && member.availableDays.map(d => (
                 <option key={d} value={d}>Day {d} (Navratri)</option>
@@ -166,9 +212,12 @@ export const ProfileModal = ({ member, currentUser, selectedDay, onClose, onRequ
           </div>
 
           {requestStatus === 'accepted' ? (
-            <div className="flex-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 py-3 sm:py-2.5 px-4 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Connected
-            </div>
+            <button
+              onClick={() => setShowChat(true)}
+              className="flex-1 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white py-3 sm:py-2.5 px-4 rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-1.5 active:scale-95"
+            >
+              <MessageSquare className="w-4 h-4" /> 💬 Chat with Saathi
+            </button>
           ) : requestStatus === 'pending' ? (
             <div className="flex-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 py-3 sm:py-2.5 px-4 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5">
               <Clock className="w-4 h-4 text-amber-400 animate-pulse" /> Request Pending
@@ -186,6 +235,17 @@ export const ProfileModal = ({ member, currentUser, selectedDay, onClose, onRequ
         </div>
 
       </div>
+
+      {/* Embedded Chat Modal */}
+      {showChat && (
+        <ChatModal
+          connectionId={connectionId || member.connectionId}
+          partner={member}
+          day={targetDay}
+          currentUser={currentUser}
+          onClose={() => setShowChat(false)}
+        />
+      )}
     </div>
   );
 };

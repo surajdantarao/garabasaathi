@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
 import { MemberCard } from '../components/MemberCard';
 import { ProfileModal } from '../components/ProfileModal';
+import { ChatModal } from '../components/ChatModal';
 import { PUNE_AREAS, NAVRATRI_DAYS, EXPERIENCE_LEVELS, ACTIVITIES, LOOKING_FOR_OPTIONS, GENDERS } from '../utils/constants';
 import { Filter, Sparkles, RefreshCw, Calendar, Info, LogIn, UserPlus } from 'lucide-react';
 import { apiUrl } from '../utils/api';
@@ -21,6 +22,7 @@ export const BrowseMembersPage = ({ setActiveTab }) => {
 
   // Modals & Toast
   const [viewingMember, setViewingMember] = useState(null);
+  const [activeChat, setActiveChat] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
   const fetchMembers = async () => {
@@ -56,6 +58,35 @@ export const BrowseMembersPage = ({ setActiveTab }) => {
     setToastMessage(message);
     setTimeout(() => setToastMessage(null), 5000);
     fetchMembers();
+  };
+
+  const handleOpenChat = async (member) => {
+    if (!currentUser) {
+      handleRequireLogin();
+      return;
+    }
+
+    let connId = member.connectionId;
+    let targetDay = selectedDay !== 'All' ? parseInt(selectedDay, 10) : (member.connectedDay || 1);
+
+    if (!connId) {
+      try {
+        const res = await fetch(apiUrl(`/api/connections/find?userId1=${currentUser.id}&userId2=${member.id}`));
+        const data = await res.json();
+        if (data.success && data.connection) {
+          connId = data.connection.id;
+          if (data.connection.navratriDay) targetDay = data.connection.navratriDay;
+        }
+      } catch (e) {
+        console.error('Error looking up connection for chat:', e);
+      }
+    }
+
+    if (connId) {
+      setActiveChat({ connectionId: connId, partner: member, day: targetDay });
+    } else {
+      setViewingMember(member);
+    }
   };
 
   const handleRequireLogin = () => {
@@ -292,13 +323,14 @@ export const BrowseMembersPage = ({ setActiveTab }) => {
               selectedDay={selectedDay}
               onRequestSuccess={handleRequestSuccess}
               onViewProfile={(m) => setViewingMember(m)}
+              onOpenChat={handleOpenChat}
               onRequireLogin={handleRequireLogin}
             />
           ))}
         </div>
       )}
 
-      {/* Modal */}
+      {/* Profile Detail Modal */}
       {viewingMember && (
         <ProfileModal
           member={viewingMember}
@@ -307,6 +339,17 @@ export const BrowseMembersPage = ({ setActiveTab }) => {
           onClose={() => setViewingMember(null)}
           onRequestSuccess={handleRequestSuccess}
           onRequireLogin={handleRequireLogin}
+        />
+      )}
+
+      {/* Direct Chat Modal */}
+      {activeChat && (
+        <ChatModal
+          connectionId={activeChat.connectionId}
+          partner={activeChat.partner}
+          day={activeChat.day}
+          currentUser={currentUser}
+          onClose={() => setActiveChat(null)}
         />
       )}
 

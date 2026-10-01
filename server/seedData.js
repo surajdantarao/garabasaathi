@@ -161,6 +161,22 @@ function seedDatabase(db) {
     db.prepare(`INSERT OR IGNORE INTO connections (senderId, receiverId, navratriDay, status) VALUES (4, 2, 1, 'pending')`).run();
     // Priya (id 2) requested connection with Amit (id 5) for Day 2 (accepted)
     db.prepare(`INSERT OR IGNORE INTO connections (senderId, receiverId, navratriDay, status) VALUES (2, 5, 2, 'accepted')`).run();
+
+    const acceptedConn = db.prepare(`SELECT id, senderId, receiverId FROM connections WHERE status = 'accepted' LIMIT 1`).get();
+    if (acceptedConn) {
+      const msgCount = db.prepare('SELECT COUNT(*) as cnt FROM messages').get().cnt;
+      if (msgCount === 0) {
+        db.prepare(`
+          INSERT INTO messages (connectionId, senderId, receiverId, text, createdAt)
+          VALUES (?, ?, ?, 'Hey Priya! Excited for Day 2 Garba at Balewadi! What time are you reaching? 🥁', datetime('now', '-30 minutes'))
+        `).run(acceptedConn.id, acceptedConn.receiverId, acceptedConn.senderId);
+
+        db.prepare(`
+          INSERT INTO messages (connectionId, senderId, receiverId, text, createdAt)
+          VALUES (?, ?, ?, 'Hey Amit! Yes super excited! Around 8:00 PM near the main entry gate. Let’s play Dodhiyu! 💃', datetime('now', '-10 minutes'))
+        `).run(acceptedConn.id, acceptedConn.senderId, acceptedConn.receiverId);
+      }
+    }
   }
 }
 

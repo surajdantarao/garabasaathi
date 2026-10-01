@@ -48,9 +48,23 @@ function initDb() {
       FOREIGN KEY(receiverId) REFERENCES users(id) ON DELETE CASCADE,
       UNIQUE(senderId, receiverId, navratriDay)
     );
+
+    CREATE TABLE IF NOT EXISTS messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      connectionId INTEGER NOT NULL,
+      senderId INTEGER NOT NULL,
+      receiverId INTEGER NOT NULL,
+      text TEXT NOT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(connectionId) REFERENCES connections(id) ON DELETE CASCADE,
+      FOREIGN KEY(senderId) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY(receiverId) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_messages_connection ON messages(connectionId);
   `);
 
-  console.log('Database tables with Auth & Connection Requests initialized.');
+  console.log('Database tables with Auth, Connection Requests & Chat Messages initialized.');
 }
 
 initDb();

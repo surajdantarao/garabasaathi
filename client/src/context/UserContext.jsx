@@ -64,14 +64,64 @@ export const UserProvider = ({ children }) => {
     localStorage.removeItem('garba_saathi_user');
   };
 
+  // Auto-sync client state with backend on boot to protect data from Render free-tier restarts
+  useEffect(() => {
+    const syncState = async () => {
+      if (!currentUser?.id && !currentUser?.username) return;
+      try {
+        let cachedConnections = [];
+        try {
+          const rawDash = localStorage.getItem('garba_dash_cache_' + currentUser.id);
+          if (rawDash) {
+            const parsed = JSON.parse(rawDash);
+            if (Array.isArray(parsed.accepted)) cachedConnections = parsed.accepted;
+          }
+        } catch (e) {}
+
+        const res = await fetch(apiUrl('/api/sync/restore'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user: currentUser,
+            connections: cachedConnections
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.user) {
+            setCurrentUser(data.user);
+            localStorage.setItem('garba_saathi_user', JSON.stringify(data.user));
+          }
+        }
+      } catch (err) {
+        console.warn('Backend sync ping pending (server waking up):', err);
+      }
+    };
+
+    syncState();
+  }, []);
+
   const refreshCurrentUser = async () => {
     if (!currentUser?.id) return;
     try {
       const res = await fetch(apiUrl(`/api/users/${currentUser.id}`));
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.user) {
         setCurrentUser(data.user);
         localStorage.setItem('garba_saathi_user', JSON.stringify(data.user));
+      } else {
+        // Backend container may have restarted: restore user record automatically
+        const restoreRes = await fetch(apiUrl('/api/sync/restore'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user: currentUser })
+        });
+        const restoreData = await restoreRes.json();
+        if (restoreData.success && restoreData.user) {
+          setCurrentUser(restoreData.user);
+          localStorage.setItem('garba_saathi_user', JSON.stringify(restoreData.user));
+        }
       }
     } catch (e) {
       console.error(e);

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { MapPin, Calendar, Sparkles, Eye, CheckCircle2, Clock, Lock } from 'lucide-react';
+import { MapPin, Calendar, Sparkles, Eye, CheckCircle2, Clock, Lock, MessageSquare } from 'lucide-react';
 import { NAVRATRI_DAYS } from '../utils/constants';
 import { apiUrl } from '../utils/api';
 
-export const MemberCard = ({ member, currentUser, selectedDay, onRequestSuccess, onViewProfile, onRequireLogin }) => {
+export const MemberCard = ({ member, currentUser, selectedDay, onRequestSuccess, onViewProfile, onOpenChat, onRequireLogin }) => {
   const [requesting, setRequesting] = useState(false);
   const [requestStatus, setRequestStatus] = useState(member.connectionStatus || null);
 
@@ -127,9 +127,19 @@ export const MemberCard = ({ member, currentUser, selectedDay, onRequestSuccess,
         </button>
 
         {requestStatus === 'accepted' ? (
-          <div className="flex-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 py-2.5 sm:py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Connected
-          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onOpenChat) {
+                onOpenChat(member);
+              } else {
+                onViewProfile(member);
+              }
+            }}
+            className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white py-2.5 sm:py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 active:scale-95 transition"
+          >
+            <MessageSquare className="w-3.5 h-3.5" /> 💬 Chat
+          </button>
         ) : requestStatus === 'pending' ? (
           <div className="flex-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 py-2.5 sm:py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5">
             <Clock className="w-4 h-4 text-amber-400 animate-pulse" /> Request Sent
