@@ -30,22 +30,41 @@ export const AdminPage = ({ setActiveTab }) => {
   const fetchAdminData = async () => {
     try {
       setLoading(true);
-      const [statsRes, usersRes, connsRes, chatsRes] = await Promise.all([
-        fetch(apiUrl('/api/admin/stats')),
-        fetch(apiUrl('/api/users')),
-        fetch(apiUrl('/api/admin/connections')),
-        fetch(apiUrl('/api/admin/chats'))
+
+      const safeFetchJson = async (url) => {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) return null;
+          return await res.json();
+        } catch (e) {
+          console.warn('Endpoint fetch warning:', url, e);
+          return null;
+        }
+      };
+
+      const [statsData, usersData, connsData, chatsData] = await Promise.all([
+        safeFetchJson(apiUrl('/api/admin/stats')),
+        safeFetchJson(apiUrl('/api/users')),
+        safeFetchJson(apiUrl('/api/admin/connections')),
+        safeFetchJson(apiUrl('/api/admin/chats'))
       ]);
 
-      const statsData = await statsRes.json();
-      const usersData = await usersRes.json();
-      const connsData = await connsRes.json();
-      const chatsData = await chatsRes.json();
-
-      if (statsData.success) setStats(statsData.stats);
-      if (usersData.success) setUsersList(usersData.users);
-      if (connsData.success) setConnectionsList(connsData.connections || []);
-      if (chatsData.success) setChatsList(chatsData.chats || []);
+      if (statsData?.success) {
+        setStats(statsData.stats);
+      }
+      if (usersData?.success) {
+        setUsersList(usersData.users || []);
+      }
+      if (connsData?.success) {
+        setConnectionsList(connsData.connections || []);
+      }
+      if (chatsData?.success && Array.isArray(chatsData.chats)) {
+        setChatsList(chatsData.chats);
+      } else if (connsData?.connections) {
+        // Fallback: Use accepted connections as active chats
+        const fallbackChats = connsData.connections.filter(c => c.status === 'accepted');
+        setChatsList(fallbackChats);
+      }
     } catch (err) {
       console.error('Error fetching admin data:', err);
     } finally {

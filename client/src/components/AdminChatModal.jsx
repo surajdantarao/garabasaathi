@@ -15,10 +15,28 @@ export const AdminChatModal = ({ connectionId, initialConnection, onClose }) => 
       if (!isSilent) setLoading(true);
       else setRefreshing(true);
 
-      const res = await fetch(apiUrl(`/api/admin/chat/${connectionId}`));
-      const data = await res.json();
+      let data = null;
+      try {
+        const res = await fetch(apiUrl(`/api/admin/chat/${connectionId}`));
+        if (res.ok) {
+          data = await res.json();
+        }
+      } catch (e) {
+        console.warn('Admin chat fetch error:', e);
+      }
 
-      if (data.success) {
+      if (!data || !data.success) {
+        try {
+          const fallbackRes = await fetch(apiUrl(`/api/chat/${connectionId}`));
+          if (fallbackRes.ok) {
+            data = await fallbackRes.json();
+          }
+        } catch (e) {
+          console.warn('Fallback chat fetch error:', e);
+        }
+      }
+
+      if (data?.success) {
         setMessages(data.messages || []);
         if (data.connection) {
           setConnection(data.connection);
