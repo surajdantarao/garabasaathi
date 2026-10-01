@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
@@ -16,7 +17,7 @@ const BACKUP_FILE = path.join(__dirname, 'backup_data.json');
 
 function persistBackupData() {
   try {
-    const users = db.prepare('SELECT * FROM users').all();
+    const users = db.prepare("SELECT * FROM users WHERE role != 'admin'").all();
     const connections = db.prepare('SELECT * FROM connections').all();
     const messages = db.prepare('SELECT * FROM messages').all();
 
@@ -75,9 +76,40 @@ function restoreBackupData() {
   }
 }
 
+// Dynamically ensure Admin account exists based on Render Environment Variables
+function ensureAdminAccount() {
+  const adminUsername = process.env.ADMIN_USERNAME;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@garbasaathi.in';
+  const adminName = process.env.ADMIN_NAME || 'Platform Administrator';
+
+  if (!adminUsername || !adminPassword) {
+    console.log('ℹ️ Admin credentials not set in environment variables (ADMIN_USERNAME & ADMIN_PASSWORD).');
+    return;
+  }
+
+  // Remove any legacy admin accounts that do not match the environment variable username
+  db.prepare("DELETE FROM users WHERE role = 'admin' AND username != ?").run(adminUsername);
+
+  const existing = db.prepare('SELECT id, role FROM users WHERE username = ?').get(adminUsername);
+  if (!existing) {
+    db.prepare(`
+      INSERT INTO users (username, email, password, role, name, age, gender, area, experience, activity, availableDays, lookingFor, socialContact, bio, avatarUrl)
+      VALUES (?, ?, ?, 'admin', ?, 26, 'Male', 'Kothrud', 'Experienced', 'Both', '[]', 'None', '', 'Platform Administrator', '')
+    `).run(adminUsername, adminEmail.toLowerCase(), adminPassword, adminName);
+    console.log(`✅ Admin account dynamically initialized for username "${adminUsername}".`);
+  } else {
+    // Keep username, password, email synchronized with environment variables
+    db.prepare(`
+      UPDATE users SET username = ?, password = ?, email = ?, role = 'admin' WHERE id = ?
+    `).run(adminUsername, adminPassword, adminEmail.toLowerCase(), existing.id);
+  }
+}
+
 // Initialize database & seed
 seedDatabase(db);
 restoreBackupData();
+ensureAdminAccount();
 persistBackupData();
 
 // Health check endpoint for cloud deployment (Render, Railway, Fly.io)
@@ -178,14 +210,21 @@ app.post('/api/auth/login', (req, res) => {
 
     const input = loginInput.trim();
 
-    // Check Special Admin Credentials: username ___suraj_sd__ & password Knowledge
-    if (input === '___suraj_sd__' && password === 'Knowledge') {
-      let adminUser = db.prepare(`SELECT * FROM users WHERE username = '___suraj_sd__'`).get();
-      if (!adminUser) {
-        adminUser = db.prepare(`SELECT * FROM users WHERE role = 'admin'`).get();
-      }
-      if (adminUser) {
-        return res.json({ success: true, message: 'Welcome Admin!', user: formatUserRow(adminUser) });
+    // Check Admin Login from environment variables (configured in Render / .env)
+    const envAdminUser = process.env.ADMIN_USERNAME;
+    const envAdminPass = process.env.ADMIN_PASSWORD;
+    const envAdminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase();
+
+    if (envAdminUser && envAdminPass) {
+      if ((input === envAdminUser || (envAdminEmail && input.toLowerCase() === envAdminEmail)) && password === envAdminPass) {
+        let adminUser = db.prepare(`SELECT * FROM users WHERE role = 'admin' OR username = ?`).get(envAdminUser);
+        if (!adminUser) {
+          ensureAdminAccount();
+          adminUser = db.prepare(`SELECT * FROM users WHERE role = 'admin' OR username = ?`).get(envAdminUser);
+        }
+        if (adminUser) {
+          return res.json({ success: true, message: 'Welcome Admin!', user: formatUserRow(adminUser) });
+        }
       }
     }
 

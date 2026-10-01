@@ -134,7 +134,7 @@ export const AdminPage = ({ setActiveTab }) => {
             Admin Management Dashboard
           </h1>
           <p className="text-xs sm:text-sm text-purple-200/70 mt-1">
-            Logged in as SuperAdmin: <strong className="text-amber-300">___suraj_sd__</strong>
+            Logged in as SuperAdmin: <strong className="text-amber-300">{currentUser?.username || 'Administrator'}</strong>
           </p>
         </div>
 

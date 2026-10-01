@@ -1,25 +1,26 @@
 import React, { useState } from 'react';
 import { useUser } from '../context/UserContext';
 import { PUNE_AREAS, NAVRATRI_DAYS, EXPERIENCE_LEVELS, ACTIVITIES, LOOKING_FOR_OPTIONS, GENDERS } from '../utils/constants';
-import { Sparkles, User, MapPin, Calendar, Heart, ShieldCheck, AtSign, Image, ArrowRight, Lock, Mail } from 'lucide-react';
+import { Sparkles, User, MapPin, Calendar, Heart, ShieldCheck, AtSign, ArrowRight, Lock } from 'lucide-react';
 
 export const RegisterPage = ({ setActiveTab }) => {
   const { registerUser } = useUser();
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
 
+  // Clean form without pre-selected options
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     name: '',
-    age: '22',
-    gender: 'Female',
-    area: 'Wakad',
-    experience: 'Intermediate',
-    activity: 'Both',
-    availableDays: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    lookingFor: 'Garba Friends',
+    age: '',
+    gender: '',
+    area: '',
+    experience: '',
+    activity: '',
+    availableDays: [],
+    lookingFor: '',
     socialContact: '',
     bio: ''
   });
@@ -28,7 +29,6 @@ export const RegisterPage = ({ setActiveTab }) => {
     setFormData(prev => {
       const current = prev.availableDays;
       if (current.includes(dayNum)) {
-        if (current.length === 1) return prev;
         return { ...prev, availableDays: current.filter(d => d !== dayNum) };
       } else {
         return { ...prev, availableDays: [...current, dayNum].sort((a, b) => a - b) };
@@ -41,10 +41,17 @@ export const RegisterPage = ({ setActiveTab }) => {
     setErrorMsg(null);
 
     if (!formData.name.trim()) return setErrorMsg('Please enter your full name.');
-    if (!formData.email.trim() || !formData.email.includes('@')) return setErrorMsg('Please enter a valid email.');
+    if (!formData.email.trim() || !formData.email.includes('@')) return setErrorMsg('Please enter a valid email address.');
     if (!formData.password.trim() || formData.password.length < 4) return setErrorMsg('Password must be at least 4 characters.');
+    if (!formData.age || parseInt(formData.age, 10) < 16) return setErrorMsg('Please enter your age (16+).');
+    if (!formData.gender) return setErrorMsg('Please select your gender.');
+    if (!formData.area) return setErrorMsg('Please select your area in Pune.');
+    if (!formData.experience) return setErrorMsg('Please select your Garba experience level.');
+    if (!formData.activity) return setErrorMsg('Please select your preferred activity.');
+    if (!formData.availableDays || formData.availableDays.length === 0) return setErrorMsg('Please select at least one Navratri day you will attend.');
+    if (!formData.lookingFor) return setErrorMsg('Please select what you are looking for.');
     if (!formData.socialContact.trim()) return setErrorMsg('Please enter your Instagram handle.');
-    if (!formData.bio.trim()) return setErrorMsg('Please tell us a little about yourself.');
+    if (!formData.bio.trim()) return setErrorMsg('Please tell us a little about yourself in the bio.');
 
     setSubmitting(true);
     const res = await registerUser(formData);
@@ -64,7 +71,7 @@ export const RegisterPage = ({ setActiveTab }) => {
       {/* Header */}
       <div className="text-center mb-6 sm:mb-8 space-y-2">
         <div className="inline-flex items-center gap-1.5 text-xs font-bold text-pink-400 uppercase tracking-widest bg-pink-500/10 px-3.5 py-1 rounded-full border border-pink-500/20">
-          <Sparkles className="w-3.5 h-3.5" /> Join Pune Community
+          <Sparkles className="w-3.5 h-3.5 text-amber-300" /> Join Pune Community
         </div>
         <h1 className="text-2xl sm:text-4xl font-extrabold text-white">
           Join GarbaSaathi 💃🕺
@@ -95,7 +102,7 @@ export const RegisterPage = ({ setActiveTab }) => {
               <input
                 type="email"
                 required
-                placeholder="e.g. ananya@gmail.com"
+                placeholder="e.g. yourname@gmail.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-purple-400/50 focus:outline-none focus:border-pink-500"
@@ -110,7 +117,7 @@ export const RegisterPage = ({ setActiveTab }) => {
                 placeholder="At least 4 characters"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
+                className="w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-purple-400/50 focus:outline-none focus:border-pink-500"
               />
             </div>
           </div>
@@ -128,7 +135,7 @@ export const RegisterPage = ({ setActiveTab }) => {
               <input
                 type="text"
                 required
-                placeholder="e.g. Ananya Patil"
+                placeholder="Enter your full name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-purple-400/50 focus:outline-none focus:border-pink-500"
@@ -142,9 +149,10 @@ export const RegisterPage = ({ setActiveTab }) => {
                 min="16"
                 max="99"
                 required
+                placeholder="e.g. 21"
                 value={formData.age}
                 onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                className="w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
+                className="w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-purple-400/50 focus:outline-none focus:border-pink-500"
               />
             </div>
           </div>
@@ -159,7 +167,7 @@ export const RegisterPage = ({ setActiveTab }) => {
                   onClick={() => setFormData({ ...formData, gender: g })}
                   className={`py-2 px-3 rounded-xl text-xs font-bold transition border ${
                     formData.gender === g
-                      ? 'bg-pink-600 text-white border-pink-400 shadow-md'
+                      ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white border-pink-400 shadow-md ring-2 ring-pink-400/40'
                       : 'bg-purple-950/60 text-purple-300 border-purple-800/60 hover:bg-purple-900/40'
                   }`}
                 >
@@ -181,9 +189,12 @@ export const RegisterPage = ({ setActiveTab }) => {
             <select
               value={formData.area}
               onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-              className="w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
+              className={`w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-pink-500 ${
+                formData.area ? 'text-white' : 'text-purple-400/70'
+              }`}
             >
-              {PUNE_AREAS.map(a => <option key={a} value={a}>{a}</option>)}
+              <option value="" disabled>-- Select your area in Pune --</option>
+              {PUNE_AREAS.map(a => <option key={a} value={a} className="text-white bg-[#180930]">{a}</option>)}
             </select>
           </div>
         </div>
@@ -200,9 +211,12 @@ export const RegisterPage = ({ setActiveTab }) => {
               <select
                 value={formData.experience}
                 onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                className="w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
+                className={`w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-pink-500 ${
+                  formData.experience ? 'text-white' : 'text-purple-400/70'
+                }`}
               >
-                {EXPERIENCE_LEVELS.map(exp => <option key={exp} value={exp}>{exp}</option>)}
+                <option value="" disabled>-- Select experience level --</option>
+                {EXPERIENCE_LEVELS.map(exp => <option key={exp} value={exp} className="text-white bg-[#180930]">{exp}</option>)}
               </select>
             </div>
 
@@ -211,17 +225,36 @@ export const RegisterPage = ({ setActiveTab }) => {
               <select
                 value={formData.activity}
                 onChange={(e) => setFormData({ ...formData, activity: e.target.value })}
-                className="w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
+                className={`w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-pink-500 ${
+                  formData.activity ? 'text-white' : 'text-purple-400/70'
+                }`}
               >
-                {ACTIVITIES.map(act => <option key={act} value={act}>{act}</option>)}
+                <option value="" disabled>-- Select preferred activity --</option>
+                {ACTIVITIES.map(act => <option key={act} value={act} className="text-white bg-[#180930]">{act}</option>)}
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-purple-200 mb-1.5">
-              Preferred Garba Dates (Select Multiple Days) *
-            </label>
+            <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+              <label className="block text-xs font-bold text-purple-200">
+                Available Garba Days (Click days you are attending) *
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  if (formData.availableDays.length === 9) {
+                    setFormData({ ...formData, availableDays: [] });
+                  } else {
+                    setFormData({ ...formData, availableDays: [1, 2, 3, 4, 5, 6, 7, 8, 9] });
+                  }
+                }}
+                className="text-[11px] font-bold text-pink-400 hover:text-pink-300 underline"
+              >
+                {formData.availableDays.length === 9 ? 'Clear All' : 'Select All 9 Days'}
+              </button>
+            </div>
+
             <div className="grid grid-cols-3 sm:grid-cols-9 gap-1.5">
               {NAVRATRI_DAYS.map((d) => {
                 const isSelected = formData.availableDays.includes(d.day);
@@ -232,8 +265,8 @@ export const RegisterPage = ({ setActiveTab }) => {
                     onClick={() => handleDayToggle(d.day)}
                     className={`py-2 text-center rounded-xl text-xs font-bold border transition ${
                       isSelected
-                        ? 'bg-gradient-to-tr from-pink-600 to-rose-600 text-white border-pink-400 shadow-md'
-                        : 'bg-purple-950/60 text-purple-400 border-purple-800/40 hover:text-white'
+                        ? 'bg-gradient-to-tr from-pink-600 to-rose-600 text-white border-pink-400 shadow-md ring-1 ring-pink-400/50'
+                        : 'bg-purple-950/60 text-purple-400 border-purple-800/40 hover:text-white hover:border-purple-600'
                     }`}
                   >
                     Day {d.day}
@@ -241,13 +274,16 @@ export const RegisterPage = ({ setActiveTab }) => {
                 );
               })}
             </div>
+            {formData.availableDays.length === 0 && (
+              <p className="text-[11px] text-purple-300/70 mt-1.5">No days selected yet. Click each day you'll be playing Garba.</p>
+            )}
           </div>
         </div>
 
         {/* Section 5: Looking For */}
         <div className="space-y-4">
           <h3 className="text-sm font-extrabold text-pink-300 uppercase tracking-wider flex items-center gap-2 pb-2 border-b border-purple-800/50">
-            <Heart className="w-4 h-4 text-pink-400" /> 5. Looking For
+            <Heart className="w-4 h-4 text-pink-400" /> 5. Looking For *
           </h3>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -258,7 +294,7 @@ export const RegisterPage = ({ setActiveTab }) => {
                 onClick={() => setFormData({ ...formData, lookingFor: lf })}
                 className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition ${
                   formData.lookingFor === lf
-                    ? 'bg-pink-600 text-white border-pink-400 shadow-md'
+                    ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white border-pink-400 shadow-md ring-2 ring-pink-400/40'
                     : 'bg-purple-950/60 text-purple-300 border-purple-800/60 hover:bg-purple-900/40'
                 }`}
               >
@@ -271,7 +307,7 @@ export const RegisterPage = ({ setActiveTab }) => {
         {/* Section 6: Social Handle */}
         <div className="space-y-4">
           <h3 className="text-sm font-extrabold text-pink-300 uppercase tracking-wider flex items-center gap-2 pb-2 border-b border-purple-800/50">
-            <AtSign className="w-4 h-4 text-pink-400" /> 6. Preferred Public Contact
+            <AtSign className="w-4 h-4 text-pink-400" /> 6. Preferred Public Contact *
           </h3>
 
           <div>
@@ -281,7 +317,7 @@ export const RegisterPage = ({ setActiveTab }) => {
             <input
               type="text"
               required
-              placeholder="e.g. Instagram: @ananya_garba_pune"
+              placeholder="e.g. Instagram: @your_instagram_handle"
               value={formData.socialContact}
               onChange={(e) => setFormData({ ...formData, socialContact: e.target.value })}
               className="w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-purple-400/50 focus:outline-none focus:border-pink-500"
@@ -296,7 +332,7 @@ export const RegisterPage = ({ setActiveTab }) => {
         {/* Section 7: About You */}
         <div className="space-y-4">
           <h3 className="text-sm font-extrabold text-pink-300 uppercase tracking-wider flex items-center gap-2 pb-2 border-b border-purple-800/50">
-            ✨ 7. About You
+            ✨ 7. About You *
           </h3>
 
           <div>
@@ -304,7 +340,7 @@ export const RegisterPage = ({ setActiveTab }) => {
             <textarea
               rows={3}
               required
-              placeholder="Tell us a little about yourself and what kind of Garba experience you're looking for..."
+              placeholder="Tell us a little about yourself, your dance style, or what events you plan to attend..."
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               className="w-full bg-purple-950/80 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-purple-400/50 focus:outline-none focus:border-pink-500 leading-relaxed"
